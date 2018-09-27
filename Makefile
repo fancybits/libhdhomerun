@@ -14,7 +14,7 @@ LIBSRCS += hdhomerun_video.c
 CC    := $(CROSS_COMPILE)gcc
 STRIP := $(CROSS_COMPILE)strip
 
-CFLAGS += -O2 -Wall -Wextra -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wno-unused-parameter
+CFLAGS += -O2 -Wall -Wextra -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wno-unused-parameter -fPIC
 LDFLAGS += -lpthread
 SHARED = -shared -Wl,-soname,libhdhomerun$(LIBEXT)
 
