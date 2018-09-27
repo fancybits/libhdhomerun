@@ -57,9 +57,16 @@ hdhomerun_config$(BINEXT) : hdhomerun_config.c $(LIBSRCS)
 libhdhomerun$(LIBEXT) : $(LIBSRCS)
 	$(CC) $(CFLAGS) -fPIC -DDLL_EXPORT $(SHARED) $+ $(LDFLAGS) -o $@
 
+.o : .c
+	$(CC) $(CFLAGS) -fPIC -c $@
+
+libhdhomerun.a : $(subst .c,.o,$(LIBSRCS))
+	$(CROSS_COMPILE)ar crs $@ $+
+
 clean :
 	-rm -f hdhomerun_config$(BINEXT)
 	-rm -f libhdhomerun$(LIBEXT)
+	-rm -f libhdhomerun.a *.o
 
 distclean : clean
 
