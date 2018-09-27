@@ -22,6 +22,7 @@ ifeq ($(OS),Windows_NT)
   BINEXT := .exe
   LIBEXT := .dll
   LDFLAGS += -liphlpapi
+  CFLAGS += -DUNICODE -D_UNICODE
 else ifeq ($(BUILD_OS),android)
   CC = $(CROSS_COMPILE)clang
   LIBEXT := .so
