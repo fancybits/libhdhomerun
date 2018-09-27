@@ -46,6 +46,7 @@ struct hdhomerun_discover_device_t {
  * Retruns -1 on error.
  */
 extern LIBHDHOMERUN_API int hdhomerun_discover_find_devices_custom_v2(uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count);
+extern LIBHDHOMERUN_API int hdhomerun_discover_find_devices_custom_v3(uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count, int timeout);
 
 /*
  * Optional: persistent discover instance available for discover polling use.
@@ -53,6 +54,7 @@ extern LIBHDHOMERUN_API int hdhomerun_discover_find_devices_custom_v2(uint32_t t
 extern LIBHDHOMERUN_API struct hdhomerun_discover_t *hdhomerun_discover_create(struct hdhomerun_debug_t *dbg);
 extern LIBHDHOMERUN_API void hdhomerun_discover_destroy(struct hdhomerun_discover_t *ds);
 extern LIBHDHOMERUN_API int hdhomerun_discover_find_devices_v2(struct hdhomerun_discover_t *ds, uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count);
+extern LIBHDHOMERUN_API int hdhomerun_discover_find_devices_v3(struct hdhomerun_discover_t *ds, uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count, int timeout);
 
 /*
  * Verify that the device ID given is valid.

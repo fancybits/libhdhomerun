@@ -407,7 +407,7 @@ static struct hdhomerun_discover_device_t *hdhomerun_discover_find_in_list(struc
 	return NULL;
 }
 
-int hdhomerun_discover_find_devices_v2(struct hdhomerun_discover_t *ds, uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count)
+int hdhomerun_discover_find_devices_v3(struct hdhomerun_discover_t *ds, uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count, int timeout)
 {
 	hdhomerun_discover_sock_detect(ds);
 
@@ -418,13 +418,13 @@ int hdhomerun_discover_find_devices_v2(struct hdhomerun_discover_t *ds, uint32_t
 			return -1;
 		}
 
-		uint64_t timeout = getcurrenttime() + 200;
+		uint64_t deadline = getcurrenttime() + timeout;
 		while (1) {
 			struct hdhomerun_discover_device_t *result = &result_list[count];
 			memset(result, 0, sizeof(struct hdhomerun_discover_device_t));
 
 			if (!hdhomerun_discover_recv(ds, result)) {
-				if (getcurrenttime() >= timeout) {
+				if (getcurrenttime() >= deadline) {
 					break;
 				}
 				msleep_approx(16);
@@ -459,7 +459,12 @@ int hdhomerun_discover_find_devices_v2(struct hdhomerun_discover_t *ds, uint32_t
 	return count;
 }
 
-int hdhomerun_discover_find_devices_custom_v2(uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count)
+int hdhomerun_discover_find_devices_v2(struct hdhomerun_discover_t *ds, uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count)
+{
+    return hdhomerun_discover_find_devices_v3(ds, target_ip, device_type, device_id, result_list, max_count, 200);
+}
+
+int hdhomerun_discover_find_devices_custom_v3(uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count, int timeout)
 {
 	if (hdhomerun_discover_is_ip_multicast(target_ip)) {
 		return 0;
@@ -470,10 +475,15 @@ int hdhomerun_discover_find_devices_custom_v2(uint32_t target_ip, uint32_t devic
 		return -1;
 	}
 
-	int ret = hdhomerun_discover_find_devices_v2(ds, target_ip, device_type, device_id, result_list, max_count);
+	int ret = hdhomerun_discover_find_devices_v3(ds, target_ip, device_type, device_id, result_list, max_count, timeout);
 
 	hdhomerun_discover_destroy(ds);
 	return ret;
+}
+
+int hdhomerun_discover_find_devices_custom_v2(uint32_t target_ip, uint32_t device_type, uint32_t device_id, struct hdhomerun_discover_device_t result_list[], int max_count)
+{
+    return hdhomerun_discover_find_devices_custom_v3(target_ip, device_type, device_id, result_list, max_count, 200);
 }
 
 bool hdhomerun_discover_validate_device_id(uint32_t device_id)
