@@ -6,10 +6,16 @@ LIBSRCS += hdhomerun_debug.c
 LIBSRCS += hdhomerun_device.c
 LIBSRCS += hdhomerun_device_selector.c
 LIBSRCS += hdhomerun_discover.c
-LIBSRCS += hdhomerun_os_posix.c
 LIBSRCS += hdhomerun_pkt.c
-LIBSRCS += hdhomerun_sock_posix.c
 LIBSRCS += hdhomerun_video.c
+
+ifeq ($(OS),Windows_NT)
+  LIBSRCS += hdhomerun_sock_windows.c
+  LIBSRCS += hdhomerun_os_windows.c
+else
+  LIBSRCS += hdhomerun_sock_posix.c
+  LIBSRCS += hdhomerun_os_posix.c
+endif
 
 CC    := $(CROSS_COMPILE)gcc
 STRIP := $(CROSS_COMPILE)strip
