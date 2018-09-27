@@ -35,6 +35,7 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+#define _WSPIAPI_EMIT_LEGACY
 #include <wspiapi.h>
 #include <stdlib.h>
 #include <stdio.h>
