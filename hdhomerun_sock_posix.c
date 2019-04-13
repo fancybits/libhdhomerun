@@ -22,6 +22,9 @@
 
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <ifaddrs.h>
 
 #ifndef SIOCGIFCONF
 #include <sys/sockio.h>
@@ -39,7 +42,55 @@ struct hdhomerun_sock_t {
 	int sock;
 };
 
-int hdhomerun_local_ip_info(struct hdhomerun_local_ip_info_t ip_info_list[], int max_count)
+int hdhomerun_local_ip_info_getifaddrs(struct hdhomerun_local_ip_info_t ip_info_list[], int max_count)
+{
+    struct ifaddrs *ifaddr;
+    int count = 0;
+
+    if (getifaddrs(&ifaddr) != 0) {
+        return -1;
+    }
+
+    for (struct ifaddrs *ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL) {
+            continue;
+        }
+
+        if ((ifa->ifa_flags & IFF_UP) == 0) {
+            continue;
+        }
+
+        if ((ifa->ifa_flags & IFF_POINTOPOINT) != 0) {
+            continue;
+        }
+
+        if (ifa->ifa_addr->sa_family == AF_INET) {
+            struct sockaddr_in *addr_in = (struct sockaddr_in *) ifa->ifa_addr;
+            struct sockaddr_in *netmask_in = (struct sockaddr_in *) ifa->ifa_netmask;
+
+            uint32_t ip_addr = ntohl(addr_in->sin_addr.s_addr);
+            uint32_t subnet_mask = ntohl(netmask_in->sin_addr.s_addr);
+
+            //printf("hdhomerun: ifr=%p ifr_name=%s sin_addr=%s \n", ifa, ifa->ifa_name, inet_ntoa(addr_in->sin_addr));
+
+            /* Report. */
+            if (count < max_count) {
+                struct hdhomerun_local_ip_info_t *ip_info = &ip_info_list[count];
+                ip_info->ip_addr = ip_addr;
+                ip_info->subnet_mask = subnet_mask;
+            }
+
+            count++;
+        }
+    }
+
+    freeifaddrs(ifaddr);
+
+    return count;
+}
+
+
+int hdhomerun_local_ip_info_ioctl(struct hdhomerun_local_ip_info_t ip_info_list[], int max_count)
 {
 	int sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock == -1) {
@@ -125,6 +176,11 @@ int hdhomerun_local_ip_info(struct hdhomerun_local_ip_info_t ip_info_list[], int
 	free(ifc.ifc_buf);
 	close(sock);
 	return count;
+}
+
+int hdhomerun_local_ip_info(struct hdhomerun_local_ip_info_t ip_info_list[], int max_count)
+{
+    return hdhomerun_local_ip_info_getifaddrs(ip_info_list, max_count);
 }
 
 static struct hdhomerun_sock_t *hdhomerun_sock_create_internal(int protocol)
